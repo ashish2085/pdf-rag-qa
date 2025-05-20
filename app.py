@@ -1,7 +1,7 @@
 import os
 import streamlit as st
 from PyPDF2 import PdfReader
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
@@ -35,17 +35,16 @@ def get_pdf_text(file) -> str:
 def create_retriever(text: str):
     # Initialize embeddings and splitter
     embeddings = OpenAIEmbeddings(openai_api_key=os.environ.get("OPENAI_API_KEY", ""))
-    splitter = CharacterTextSplitter(
+    splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,
-        separators=["\n", " ", ""],
     )
     # Split and embed
     chunks = splitter.split_text(text)
     vector_store = FAISS.from_texts(chunks, embeddings)
     return vector_store.as_retriever(search_kwargs={"k": 4})
 
-# Cache the RetrievalQA chain
+# Create the RetrievalQA chain
 def get_qa_chain(retriever):
     llm = OpenAI(
         temperature=0,
@@ -81,12 +80,11 @@ if uploaded_file:
 
     # Ask questions
     user_question = st.text_input("Ask a question about the PDF:")
-    if user_question:
-        if st.button("Get Answer"):
-            with st.spinner("Generating answer..."):
-                answer = qa_chain.run(user_question)
-            st.write("**Answer:**")
-            st.write(answer)
+    if user_question and st.button("Get Answer"):
+        with st.spinner("Generating answer..."):
+            answer = qa_chain.run(user_question)
+        st.write("**Answer:**")
+        st.write(answer)
 
 else:
     st.write("Please upload a PDF to get started.")
