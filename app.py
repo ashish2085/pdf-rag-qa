@@ -38,7 +38,7 @@ def create_retriever(text: str):
     splitter = CharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,
-        separators=["\n", " "],
+        separators=["\n", " ", ""],
     )
     # Split and embed
     chunks = splitter.split_text(text)
