@@ -1,7 +1,7 @@
 import os
 import streamlit as st
 from PyPDF2 import PdfReader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
@@ -35,7 +35,7 @@ def get_pdf_text(file) -> str:
 def create_retriever(text: str):
     # Initialize embeddings and splitter
     embeddings = OpenAIEmbeddings(openai_api_key=os.environ.get("OPENAI_API_KEY", ""))
-    splitter = RecursiveCharacterTextSplitter(
+    splitter = CharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200,
     )
@@ -85,7 +85,6 @@ if uploaded_file:
             answer = qa_chain.run(user_question)
         st.write("**Answer:**")
         st.write(answer)
-
 else:
     st.write("Please upload a PDF to get started.")
 
